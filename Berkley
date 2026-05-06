@@ -1,0 +1,91 @@
+Berkley
+server.py
+import socket, threading, datetime, time
+
+clients = {}
+lock = threading.Lock()
+
+def handle(conn, addr):
+    print(f"[+] {addr} connected")
+    while True:
+        try:
+            with lock:
+                clients[addr] = (conn, datetime.datetime.fromisoformat(conn.recv(1024).decode()))
+            print(f"[TIME] {addr} -> {clients[addr][1]}")
+        except:
+            print(f"[-] {addr} disconnected")
+            with lock: clients.pop(addr, None)
+            break
+
+def sync():
+    while True:
+        time.sleep(5)
+        with lock:
+            if not clients:
+                print("[SYNC] No clients")
+                continue
+            diffs = [datetime.datetime.now() - t for _, t in clients.values()]
+            diffs.append(datetime.timedelta(0))
+            avg = sum(diffs, datetime.timedelta()) / len(diffs)
+            print(f"[SYNC] avg_diff = {avg}")
+            for addr, (conn, t) in clients.items():
+                try:
+                    conn.send((datetime.datetime.now() - (datetime.datetime.now() - t) + avg).isoformat().encode())
+                    print(f"[SENT] {addr} -> corrected time")
+                except:
+                    print(f"[ERR] {addr}")
+
+s = socket.socket()
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+s.bind(("0.0.0.0", 8080))
+s.listen()
+print("[SERVER] Running on port 8080")
+
+threading.Thread(target=sync, daemon=True).start()
+while True:
+    conn, addr = s.accept()
+    threading.Thread(target=handle, args=(conn, addr), daemon=True).start()
+
+
+
+
+client.py
+
+import socket, threading, datetime, time
+
+offset = datetime.timedelta(0)
+
+def send(sock):
+    while True:
+        try:
+            t = (datetime.datetime.now() + offset).isoformat()
+            sock.send(t.encode())
+            print(f"[SENT] {t}")
+            time.sleep(5)
+        except: break
+
+def receive(sock):
+    global offset
+    while True:
+        try:
+            synced = datetime.datetime.fromisoformat(sock.recv(1024).decode())
+            offset = synced - datetime.datetime.now()
+            print(f"[SYNCED] offset = {offset}")
+        except:
+            print("[DISCONNECTED]")
+            break
+
+sock = socket.socket()
+sock.connect(("127.0.0.1", 8080))
+print("[CONNECTED]")
+
+threading.Thread(target=send, args=(sock,), daemon=True).start()
+threading.Thread(target=receive, args=(sock,), daemon=True).start()
+
+while True: time.sleep(1)
+
+
+
+python/python3 server.py
+python/python3 client.py
+
