@@ -1,0 +1,125 @@
+File New Project JAva web Web Application
+
+PRoject name Assignment 7
+
+Glassfish server JAva ee 7 web
+
+No framework
+
+
+--------------------------------------------------
+
+Assignment 7 new Webservice
+
+MycalculatorWebService
+package com.myservice create from scratch
+
+-------------------------------------------------
+MycalulatorWebService Add operation 
+
+addition double add parameter num1 num2 double
+
+change return in code
+
+-------------------------------------------------
+Assignment 7 build deploy
+
+Mycalculatorwebservice Test web service
+
+--------------------------------------------------
+
+minimize assignment 7
+file new project java webapplication 
+name calculatorwebserviceclient finish
+
+-------------------------------------------------
+ window ide tools pallete
+drag form into body 
+action calculatorservlet get ok
+drag text input
+<input type="submit" value="submit"/>
+
+-------------------------------------------------------
+calculatorwebserviceclient new web service client browse mycalculatorwebservice ok finish
+
+---------------------------------------------
+calculatorwebserviceclient new servelet calculatorservlet next web.xml check finish
+
+drag all addition ,sub methods
+
+double num1,num2
+num1 = Double.parseDouble(request.getParameter("number1"));
+num2 = Double.parseDouble(request.getParameter("number2"));
+
+
+in body
+<h1>Addition is: "+addition(num1,num2)+"</h1>");
+
+-------------------------------------------------
+calculatorwebserviceclient clean and build
+webpages webinf index.html run file
+
+
+
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Calculator Web Service</title>
+</head>
+<body>
+
+    <h1>Welcome to Calculator Web Service</h1>
+
+    <p>This service provides operations like add, subtract, multiply, divide.</p>
+
+    <h2>Calculator </h2>
+
+    <form action="CalculatorClient" method="get">
+        
+        Number 1:
+        <input type="text" name="num1" required>
+        <br><br>
+
+        Number 2:
+        <input type="text" name="num2" required>
+        <br><br>
+
+        <input type="submit" value="Calculate All">
+
+    </form>
+
+</body>
+</html>
+
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.servlet.*;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.*;
+
+@WebServlet("/CalculatorClient")
+public class CalculatorClient extends HttpServlet {
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        double num1 = Double.parseDouble(request.getParameter("num1"));
+        double num2 = Double.parseDouble(request.getParameter("num2"));
+
+        double add = num1 + num2;
+        double sub = num1 - num2;
+       
+
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+
+        out.println("<h2>Results:</h2>");
+        out.println("Addition: " + add + "<br>");
+        out.println("Subtraction: " + sub + "<br>");
+        
+    }
+}
