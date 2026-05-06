@@ -1,0 +1,59 @@
+import java.util.Scanner;
+
+class tokenring {
+
+    public static void main(String[] args) {
+
+        Scanner scan = new Scanner(System.in);
+
+        // Input number of nodes
+        System.out.print("Enter number of nodes: ");
+        int n = scan.nextInt();
+
+        boolean[] wantsCS = new boolean[n];
+
+        // Input which nodes want critical section
+        System.out.println("\nWhich nodes want to enter Critical Section?");
+        for (int i = 0; i < n; i++) {
+            System.out.print("Node " + i + " wants CS? (1-Yes / 0-No): ");
+            wantsCS[i] = (scan.nextInt() == 1);
+        }
+ 
+        int token = 0; // Token starts at node 0
+
+        // Display ring structure
+        System.out.println("\n--- Token Ring Mutual Exclusion Started ---");
+        System.out.print("Ring: ");
+        for (int i = 0; i < n; i++) {
+            System.out.print(i + " -> ");
+        }
+        System.out.println("0");
+
+        // Token circulation (one full round)
+        for (int i = 0; i < n; i++) {
+
+            int current = (token + i) % n;
+            System.out.println("\nToken at Node " + current);
+
+            if (wantsCS[current]) {
+                System.out.println("Node " + current + " has token → Entering Critical Section");
+                System.out.println("[Node " + current + " executing Critical Section...]");
+                System.out.println("Node " + current + " leaving Critical Section");
+
+                wantsCS[current] = false; // Reset after execution
+            } else {
+                int next = (current + 1) % n;
+                System.out.println("Node " + current + " doesn't need CS → Passing token to Node " + next);
+            }
+        }
+
+        System.out.println("\n--- One full round complete. All requests served. ---");
+
+        scan.close();
+    }
+}
+
+
+
+javac tokenring.java
+java tokenring
