@@ -1,0 +1,82 @@
+Bully.java
+import java.util.*;
+public class Bully {
+    static int n;
+    static boolean[] active;
+
+    static void elect(int s) {
+        System.out.println("\n[ELECTION] Node " + s + " starts election");
+        for (int i = s + 1; i <= n; i++) {
+            if (active[i]) {
+                System.out.println("Node " + s + " -> ELECTION -> Node " + i);
+                System.out.println("Node " + i + " -> OK      -> Node " + s);
+                elect(i);
+                return;
+            }
+        }
+        System.out.println("\n*** Node " + s + " is LEADER ***");
+        for (int i = 1; i <= n; i++)
+            if (active[i] && i != s)
+                System.out.println("Node " + s + " -> COORDINATOR -> Node " + i);
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter number of nodes: ");
+        n = sc.nextInt();
+        active = new boolean[n + 1];
+        Arrays.fill(active, true);
+        System.out.print("Enter failed node: ");
+        active[sc.nextInt()] = false;
+        System.out.print("Enter node starting election: ");
+        int starter = sc.nextInt();
+        elect(starter);
+    }
+}
+
+
+Ring.java
+
+import java.util.*;
+public class Ring {
+    static int n;
+    static boolean[] active;
+    static int[] nodes;
+
+    static void elect(int start) {
+        List<Integer> list = new ArrayList<>();
+        int cur = start;
+        System.out.println("\n[ELECTION] Node " + start + " starts election");
+
+        // Pass token around ring
+        do {
+            if (active[cur]) {
+                list.add(cur);
+                System.out.println("Node " + cur + " adds to list -> " + list);
+            }
+            cur = (cur % n) + 1;
+        } while (cur != start);
+
+        int leader = Collections.max(list);
+        System.out.println("\n*** Node " + leader + " is LEADER ***");
+
+        // Announce to all
+        for (int i = 1; i <= n; i++)
+            if (active[i])
+                System.out.println("Node " + i + " acknowledges Leader " + leader);
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter number of nodes: ");
+        n = sc.nextInt();
+        active = new boolean[n + 1];
+        Arrays.fill(active, true);
+        System.out.print("Enter failed node: ");
+        active[sc.nextInt()] = false;
+        System.out.print("Enter node starting election: ");
+        elect(sc.nextInt());
+    }
+}
+
+
