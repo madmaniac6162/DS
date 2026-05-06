@@ -1,0 +1,123 @@
+Calc.idl
+
+module CalcApp
+{
+    interface Calc
+    {
+        float add(in float a, in float b);
+    };
+};
+
+CalcImpl.java
+import CalcApp.*;
+
+class CalcImpl extends CalcPOA
+{
+    public float add(float a, float b)
+    {
+        return a + b;
+    }
+}
+
+Client.java
+import CalcApp.*;
+import org.omg.CORBA.*;
+import org.omg.CosNaming.*;
+import java.util.Scanner;
+
+class Client
+{
+    public static void main(String args[])
+    {
+        try
+        {
+            ORB orb = ORB.init(args, null);
+
+            org.omg.CORBA.Object objRef =
+                    orb.resolve_initial_references("NameService");
+
+            NamingContextExt ncRef =
+                    NamingContextExtHelper.narrow(objRef);
+
+            Calc obj = CalcHelper.narrow(
+                    ncRef.resolve_str("ABC"));
+
+            Scanner sc = new Scanner(System.in);
+
+            System.out.print("Enter first number: ");
+            float a = sc.nextFloat();
+
+            System.out.print("Enter second number: ");
+            float b = sc.nextFloat();
+
+            System.out.println("Addition = " + obj.add(a, b));
+        }
+        catch(Exception e)
+        {
+            System.out.println(e);
+        }
+    }
+}
+
+
+Server.javaa
+
+import CalcApp.*;
+import org.omg.CORBA.*;
+import org.omg.PortableServer.*;
+import org.omg.CosNaming.*;
+
+class Server
+{
+    public static void main(String args[])
+    {
+        try
+        {
+            ORB orb = ORB.init(args, null);
+
+            POA rootpoa = POAHelper.narrow(
+                    orb.resolve_initial_references("RootPOA"));
+
+            rootpoa.the_POAManager().activate();
+
+            CalcImpl obj = new CalcImpl();
+
+            org.omg.CORBA.Object ref =
+                    rootpoa.servant_to_reference(obj);
+
+            Calc href = CalcHelper.narrow(ref);
+
+            org.omg.CORBA.Object objRef =
+                    orb.resolve_initial_references("NameService");
+
+            NamingContextExt ncRef =
+                    NamingContextExtHelper.narrow(objRef);
+
+            ncRef.rebind(ncRef.to_name("ABC"), href);
+
+            System.out.println("Server Started");
+
+            orb.run();
+        }
+        catch(Exception e)
+        {
+            System.out.println(e);
+        }
+    }
+}
+
+
+first terminal
+java -version
+sudo apt install openjdk-8-jdk
+idlj -fall Calc.idl
+javac *.java CalcApp/*.java
+
+second teminal
+tnameserv -ORBInitialPort 1050
+
+third terminal
+java Server -ORBInitialPort 1050
+
+fourth terminal
+java Client -ORBInitialPort 1050
